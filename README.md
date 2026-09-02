@@ -2,10 +2,8 @@
 
 [Figranium](https://figranium.dev/) is a visual, self-hosted browser-automation platform. This official Dify Tool Plugin lets Dify workflows and agents run the reusable Figranium tasks you have already built and return their results as structured JSON.
 
-> **Status:** ready for local and GitHub-based installation. This plugin has not yet been submitted to the Dify Marketplace.
-
 - **Figranium:** [Website](https://figranium.dev/) · [Documentation](https://figranium.dev/docs) · [Source](https://github.com/figranium/figranium)
-- **This plugin:** [Source](https://github.com/figranium/figranium-dify) · [Issues and support](https://github.com/figranium/figranium-dify/issues)
+- **This plugin:** [Source](https://github.com/figranium/figranium-dify) · [Support](mailto:integrations@figranium.dev) · [Issues](https://github.com/figranium/figranium-dify/issues)
 
 ## What it does
 
@@ -93,26 +91,6 @@ The complete JSON response from Figranium is returned to Dify. This retains task
 Figranium tasks can automate browsers and may interact with credentials, websites, or data defined in those tasks. Enable only tasks you trust, scope Figranium API keys appropriately, and restrict network access to the Figranium server.
 
 The plugin sends its API key, task ID, and optional variable overrides only to the Figranium URL configured in Dify. It has no telemetry, analytics, persistent storage, or calls to any other service. Read the full [privacy policy](PRIVACY.md).
-
-## Development
-
-This project requires Python 3.12 and [uv](https://docs.astral.sh/uv/). The Dify Plugin CLI is required to create installable packages.
-
-```bash
-uv sync --locked
-uv run pytest
-uv run ruff check .
-uv run ruff format --check .
-dify plugin package . --output_path ../figranium-0.0.1.difypkg
-```
-
-The test suite covers request construction, URL and timeout validation, variable parsing, API errors, malformed responses, secret-safe error handling, and provider credential validation.
-
-## Release and Marketplace
-
-Do not publish a package until it has been tested against a reachable Figranium server. For a Marketplace release, package a new version, fork [langgenius/dify-plugins](https://github.com/langgenius/dify-plugins), and submit one package at `figranium/figranium/` through its English-language PR template. Disclose the browser-automation capability as high risk during review.
-
-See Dify's [Marketplace submission guide](https://docs.dify.ai/en/develop-plugin/publishing/marketplace-listing/release-to-dify-marketplace) for current review requirements.
 
 ## License
 
