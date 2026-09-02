@@ -1,0 +1,14 @@
+identity:
+  name: list_tasks
+  author: figranium
+  label:
+    en_US: List Tasks
+description:
+  human:
+    en_US: List saved Figranium task IDs, names, and descriptions.
+  llm: List saved Figranium automation task IDs, names, and descriptions. Use this to identify the exact task ID before calling execute_task.
+parameters: []
+extra:
+  python:
+    source: tools/list_tasks.py
+

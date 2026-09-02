@@ -1,0 +1,49 @@
+identity:
+  author: figranium
+  name: figranium
+  label:
+    en_US: Figranium
+  description:
+    en_US: Execute reusable browser automation tasks hosted by your Figranium server.
+  icon: figranium_icon_light.svg
+  icon_dark: figranium_icon_dark.svg
+  tags:
+    - productivity
+    - utilities
+credentials_schema:
+  - name: base_url
+    type: text-input
+    required: true
+    default: http://localhost:11345
+    label:
+      en_US: Figranium base URL
+    placeholder:
+      en_US: http://localhost:11345
+    help:
+      en_US: The reachable base URL of your self-hosted Figranium server.
+  - name: api_key
+    type: secret-input
+    required: true
+    label:
+      en_US: Figranium API key
+    placeholder:
+      en_US: Enter the API key from Figranium Settings
+    help:
+      en_US: Sent only to your configured Figranium server as the x-api-key header.
+  - name: timeout_seconds
+    type: text-input
+    required: false
+    default: "120"
+    label:
+      en_US: Request timeout (seconds)
+    placeholder:
+      en_US: "120"
+    help:
+      en_US: Between 1 and 300 seconds. Increase for long-running browser automations.
+tools:
+  - tools/execute_task.yaml
+  - tools/list_tasks.yaml
+extra:
+  python:
+    source: provider/figranium.py
+

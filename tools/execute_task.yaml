@@ -1,0 +1,34 @@
+identity:
+  name: execute_task
+  author: figranium
+  label:
+    en_US: Execute Task
+description:
+  human:
+    en_US: Run a saved Figranium browser automation task and return its result. Provide a task ID and, when needed, JSON variable overrides.
+  llm: Run a saved Figranium browser automation task by its exact task ID. Use list_tasks first when you need to discover task IDs. variables_json is optional and must be a JSON object of string key/value overrides, for example {"url":"https://example.com","limit":"10"}. Return the Figranium result exactly as provided.
+parameters:
+  - name: task_id
+    type: string
+    required: true
+    label:
+      en_US: Task ID
+    human_description:
+      en_US: The ID of the saved Figranium task to run.
+    llm_description: The exact ID of the saved Figranium automation task to execute. Use list_tasks if the ID is unknown.
+    form: llm
+  - name: variables_json
+    type: string
+    required: false
+    label:
+      en_US: Variable overrides (JSON)
+    placeholder:
+      en_US: '{"url":"https://example.com","limit":"10"}'
+    human_description:
+      en_US: Optional JSON object of runtime variable overrides. Values must be strings.
+    llm_description: Optional JSON object of runtime variable overrides. Use only string values, e.g. {"url":"https://example.com","limit":"10"}. Omit when no overrides are needed.
+    form: llm
+extra:
+  python:
+    source: tools/execute_task.py
+
