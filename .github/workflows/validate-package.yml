@@ -1,0 +1,74 @@
+name: Validate Dify package
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.7'
+
+      - name: Install yq
+        run: |
+          sudo curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.45.4/yq_linux_amd64 -o /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Clone Dify Marketplace Toolkit
+        run: gh repo clone langgenius/dify-marketplace-toolkit -- .scripts
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Download Dify plugin daemon
+        run: |
+          gh release download -R langgenius/dify-plugin-daemon --pattern 'dify-plugin-linux-amd64' --dir /tmp
+          chmod +x /tmp/dify-plugin-linux-amd64
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Create clean package source
+        run: |
+          PACKAGE_SOURCE="$RUNNER_TEMP/figranium-package-source"
+          mkdir -p "$PACKAGE_SOURCE"
+          git archive HEAD | tar -x -C "$PACKAGE_SOURCE"
+          rm -f "$PACKAGE_SOURCE/.gitignore" "$PACKAGE_SOURCE/pyproject.toml" "$PACKAGE_SOURCE/uv.lock"
+          if find "$PACKAGE_SOURCE" -name .git -o -name .venv -o -name __pycache__ | grep -q .; then
+            echo 'Development metadata found in clean package source'
+            exit 1
+          fi
+          echo "PACKAGE_SOURCE=$PACKAGE_SOURCE" >> "$GITHUB_ENV"
+
+      - name: Package plugin
+        run: |
+          /tmp/dify-plugin-linux-amd64 plugin package "$PACKAGE_SOURCE" --output_path /tmp/figranium-0.0.1.difypkg
+          unzip -l /tmp/figranium-0.0.1.difypkg
+
+      - name: Run official Dify Marketplace validator
+        run: |
+          python3 .scripts/skill/local-difypkg-validator/scripts/validate_difypkg.py \
+            /tmp/figranium-0.0.1.difypkg \
+            --toolkit-dir .scripts \
+            --offline \
+            --output-dir /tmp/dify-validation-report
+
+      - name: Upload validated package
+        uses: actions/upload-artifact@v4
+        with:
+          name: figranium-dify-package
+          path: /tmp/figranium-0.0.1.difypkg
+          if-no-files-found: error
