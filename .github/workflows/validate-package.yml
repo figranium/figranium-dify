@@ -46,6 +46,7 @@ jobs:
           PACKAGE_SOURCE="$RUNNER_TEMP/figranium-package-source"
           mkdir -p "$PACKAGE_SOURCE"
           git archive HEAD | tar -x -C "$PACKAGE_SOURCE"
+          rm -rf "$PACKAGE_SOURCE/.github"
           rm -f "$PACKAGE_SOURCE/.gitignore" "$PACKAGE_SOURCE/pyproject.toml" "$PACKAGE_SOURCE/uv.lock"
           if find "$PACKAGE_SOURCE" -name .git -o -name .venv -o -name __pycache__ | grep -q .; then
             echo 'Development metadata found in clean package source'
