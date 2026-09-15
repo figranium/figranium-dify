@@ -52,17 +52,20 @@ jobs:
             echo 'Development metadata found in clean package source'
             exit 1
           fi
+          VERSION="$(yq -r '.version' manifest.yaml)"
+          PACKAGE_PATH="/tmp/figranium-${VERSION}.difypkg"
           echo "PACKAGE_SOURCE=$PACKAGE_SOURCE" >> "$GITHUB_ENV"
+          echo "PACKAGE_PATH=$PACKAGE_PATH" >> "$GITHUB_ENV"
 
       - name: Package plugin
         run: |
-          /tmp/dify-plugin-linux-amd64 plugin package "$PACKAGE_SOURCE" --output_path /tmp/figranium-0.0.1.difypkg
-          unzip -l /tmp/figranium-0.0.1.difypkg
+          /tmp/dify-plugin-linux-amd64 plugin package "$PACKAGE_SOURCE" --output_path "$PACKAGE_PATH"
+          unzip -l "$PACKAGE_PATH"
 
       - name: Run official Dify Marketplace validator
         run: |
           python3 .scripts/skill/local-difypkg-validator/scripts/validate_difypkg.py \
-            /tmp/figranium-0.0.1.difypkg \
+            "$PACKAGE_PATH" \
             --toolkit-dir .scripts \
             --offline \
             --output-dir /tmp/dify-validation-report
@@ -71,5 +74,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: figranium-dify-package
-          path: /tmp/figranium-0.0.1.difypkg
+          path: ${{ env.PACKAGE_PATH }}
           if-no-files-found: error
