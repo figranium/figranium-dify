@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from typing import Any
 
 from dify_plugin import Tool
 from dify_plugin.entities.tool import I18nObject, ToolInvokeMessage, ToolParameter, ToolParameterOption
 
-from figranium_client import FigraniumClient, parse_variables_json
+from figranium_client import FigraniumClient, FigraniumError
 
 
 class ExecuteTaskTool(Tool):
@@ -14,7 +14,15 @@ class ExecuteTaskTool(Tool):
 
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage, None, None]:
         client = FigraniumClient.from_credentials(self.runtime.credentials)
-        variables = parse_variables_json(tool_parameters.get("variables_json"))
+        raw_variables = tool_parameters.get("variables")
+        if raw_variables in (None, ""):
+            variables: dict[str, str] = {}
+        elif isinstance(raw_variables, Mapping) and all(
+            isinstance(key, str) and isinstance(value, str) for key, value in raw_variables.items()
+        ):
+            variables = dict(raw_variables)
+        else:
+            raise FigraniumError("Variables must be a dictionary with string keys and string values.")
         response = client.execute_task(tool_parameters.get("task_id"), variables)
         yield self.create_json_message(response)
 
@@ -31,25 +39,16 @@ class ExecuteTaskTool(Tool):
             if not task_id:
                 continue
             task_name = str(task.get("name") or task_id).strip() or task_id
-            options.append(
-                ToolParameterOption(
-                    value=task_id,
-                    label=I18nObject(en_US=task_name),
-                )
-            )
+            options.append(ToolParameterOption(value=task_id, label=I18nObject(en_US=task_name)))
 
         return [
             ToolParameter(
                 name="task_id",
                 label=I18nObject(en_US="Task"),
-                human_description=I18nObject(
-                    en_US="Choose a saved task from the connected Figranium server."
-                ),
+                human_description=I18nObject(en_US="Choose a saved task from the connected Figranium server."),
                 type=ToolParameter.ToolParameterType.DYNAMIC_SELECT,
                 form=ToolParameter.ToolParameterForm.LLM,
-                llm_description=(
-                    "Select the saved Figranium automation task to execute from the available task list."
-                ),
+                llm_description="Select the saved Figranium automation task to execute from the available task list.",
                 required=True,
                 options=options,
             )
