@@ -5,8 +5,8 @@ identity:
     en_US: Execute Task
 description:
   human:
-    en_US: Run a saved Figranium browser automation task and return its result. Choose a task and, when needed, provide JSON variable overrides.
-  llm: Run a saved Figranium browser automation task. Choose one of the tasks returned by the connected Figranium server. variables_json is optional and must be a JSON object of string key/value overrides, for example {"url":"https://example.com","limit":"10"}. Return the Figranium result exactly as provided.
+    en_US: Run a saved Figranium browser automation task and return its result. Choose a task and, when needed, provide variable overrides.
+  llm: Run a saved Figranium browser automation task. Choose one of the tasks returned by the connected Figranium server. variables is an optional dictionary of runtime overrides. Return the Figranium result exactly as provided.
 parameters:
   - name: task_id
     type: dynamic-select
@@ -19,16 +19,18 @@ parameters:
       en_US: Choose a saved task from the connected Figranium server.
     llm_description: Select the saved Figranium automation task to execute from the available task list.
     form: llm
-  - name: variables_json
-    type: string
+  - name: variables
+    type: object
     required: false
     label:
-      en_US: Variable overrides (JSON)
-    placeholder:
-      en_US: '{"url":"https://example.com","limit":"10"}'
+      en_US: Variables
     human_description:
-      en_US: Optional JSON object of runtime variable overrides. Values must be strings.
-    llm_description: Optional JSON object of runtime variable overrides. Use only string values, e.g. {"url":"https://example.com","limit":"10"}. Omit when no overrides are needed.
+      en_US: Optional key-value dictionary of runtime variable overrides.
+    llm_description: Optional dictionary of runtime variable overrides, for example {"url":"https://example.com","limit":"10"}. Omit when no overrides are needed.
+    input_schema:
+      type: object
+      additionalProperties:
+        type: string
     form: llm
 extra:
   python:
