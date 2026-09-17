@@ -9,7 +9,7 @@
 
 | Tool | Use it when you need to |
 | --- | --- |
-| **Execute Task** | Run a saved Figranium task by ID, optionally overriding its runtime variables. This is the primary tool. |
+| **Execute Task** | Choose and run a saved Figranium task, optionally overriding its runtime variables. This is the primary tool. |
 | **List Tasks** | Retrieve task IDs, names, and descriptions before selecting a task to execute. |
 
 The plugin deliberately does not create, modify, delete, schedule, inspect, or open browser sessions. Build and manage automation in Figranium; use Dify to invoke trusted, reusable tasks.
@@ -46,7 +46,7 @@ Saving the credentials performs a read-only `List Tasks` request to verify the c
 
 1. Add **Figranium → Execute Task** to a Workflow.
 2. Set `task_id` to the ID of a saved Figranium task.
-3. Optionally bind `variables_json` to a JSON string from an earlier node.
+3. Optionally provide `variables` as a key-value dictionary from an earlier node.
 4. Use the returned JSON directly in downstream nodes.
 
 ### Agent
@@ -55,7 +55,7 @@ Enable **Figranium → Execute Task** and, when task discovery is useful, **Figr
 
 ## Execute Task input and output
 
-`task_id` is required. `variables_json` is optional and must be a JSON object whose keys and values are strings:
+`task_id` is required. `variables` is optional and must be a dictionary whose keys and values are strings:
 
 ```json
 {
