@@ -71,7 +71,7 @@ jobs:
             --output-dir /tmp/dify-validation-report
 
       - name: Upload validated package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: figranium-dify-package
           path: ${{ env.PACKAGE_PATH }}
