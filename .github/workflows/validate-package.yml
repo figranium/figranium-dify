@@ -46,12 +46,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: Run API client security regression tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+
       - name: Create clean package source
         run: |
           PACKAGE_SOURCE="$RUNNER_TEMP/figranium-package-source"
           mkdir -p "$PACKAGE_SOURCE"
           git archive HEAD | tar -x -C "$PACKAGE_SOURCE"
-          rm -rf "$PACKAGE_SOURCE/.github"
+          rm -rf "$PACKAGE_SOURCE/.github" "$PACKAGE_SOURCE/tests"
           rm -f "$PACKAGE_SOURCE/.gitignore" "$PACKAGE_SOURCE/pyproject.toml" "$PACKAGE_SOURCE/uv.lock"
           if find "$PACKAGE_SOURCE" -name .git -o -name .venv -o -name __pycache__ | grep -q .; then
             echo 'Development metadata found in clean package source'
