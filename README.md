@@ -90,7 +90,7 @@ The complete JSON response from Figranium is returned to Dify. This retains task
 
 Figranium tasks can automate browsers and may interact with credentials, websites, or data defined in those tasks. Enable only tasks you trust, scope Figranium API keys appropriately, and restrict network access to the Figranium server.
 
-The plugin sends its API key, task ID, and optional variable overrides only to the Figranium URL configured in Dify. It has no telemetry, analytics, persistent storage, or calls to any other service. Read the full [privacy policy](PRIVACY.md).
+The plugin sends its API key, task ID, and optional variable overrides only to the Figranium URL configured in Dify. HTTP redirects are rejected for authenticated API requests, so a server redirect cannot forward the API key to another destination. It has no telemetry, analytics, persistent storage, or calls to any other service. Read the full [privacy policy](PRIVACY.md).
 
 ## License
 

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 DEFAULT_BASE_URL = "http://localhost:11345"
 DEFAULT_TIMEOUT_SECONDS = 120
@@ -18,6 +18,13 @@ TIMEOUT_ERROR_MESSAGE = "Figranium request timed out. Increase the timeout for l
 
 class FigraniumError(Exception):
     """A safe, user-facing Figranium integration error."""
+
+
+class _NoRedirectHandler(HTTPRedirectHandler):
+    """Never forward the API key to a URL supplied by an HTTP redirect."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 
 def normalize_base_url(value: Any) -> str:
@@ -106,7 +113,7 @@ class FigraniumClient:
             },
         )
         try:
-            with urlopen(request, timeout=self.timeout_seconds) as response:  # noqa: S310 -- fixed configured base URL
+            with build_opener(_NoRedirectHandler()).open(request, timeout=self.timeout_seconds) as response:
                 body = response.read().decode("utf-8")
         except HTTPError as error:
             raise self._http_error(error.code) from error
@@ -129,6 +136,10 @@ class FigraniumClient:
 
     @staticmethod
     def _http_error(status_code: int) -> FigraniumError:
+        if 300 <= status_code <= 399:
+            return FigraniumError(
+                "Figranium redirected the authenticated request. Redirects are blocked to protect the API key."
+            )
         if status_code == 401:
             return FigraniumError(
                 "Figranium rejected the API key. Check the configured credentials."
