@@ -95,3 +95,8 @@ The plugin sends its API key, task ID, and optional variable overrides only to t
 ## License
 
 This repository is distributed under the included [license](LICENSE).
+
+
+### Figranium Cloud
+
+Use `https://cloud.figranium.dev` and a Cloud API key to connect. A self-hosted server URL remains supported. Cloud executions are queued and return an execution ID; runtime variable overrides and schedules are not currently supported through Cloud API keys.

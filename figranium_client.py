@@ -10,7 +10,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-DEFAULT_BASE_URL = "http://localhost:11345"
+DEFAULT_BASE_URL = "https://cloud.figranium.dev"
 DEFAULT_TIMEOUT_SECONDS = 120
 MAX_TIMEOUT_SECONDS = 300
 TIMEOUT_ERROR_MESSAGE = "Figranium request timed out. Increase the timeout for long-running tasks."
@@ -84,8 +84,16 @@ class FigraniumClient:
             timeout_seconds=parse_timeout(credentials.get("timeout_seconds")),
         )
 
+    @property
+    def is_cloud(self) -> bool:
+        import re
+        host = (urlsplit(self.base_url).hostname or "").lower()
+        return host == "cloud.figranium.dev" or host.endswith(".cloud.figranium.dev") or bool(re.fullmatch(r"figranium-cloud\.[a-z0-9-]+\.workers\.dev", host))
+
     def list_tasks(self) -> dict[str, Any]:
-        response = self._request("GET", "/api/tasks/list")
+        response = self._request("GET", "/api/v1/tasks" if self.is_cloud else "/api/tasks/list")
+        if self.is_cloud and isinstance(response, list):
+            response = {"tasks": response}
         tasks = response.get("tasks") if isinstance(response, dict) else None
         if not isinstance(tasks, list):
             raise FigraniumError("Figranium returned an invalid task-list response.")
@@ -95,12 +103,16 @@ class FigraniumClient:
         normalized_task_id = str(task_id or "").strip()
         if not normalized_task_id:
             raise FigraniumError("Task ID is required.")
+        if self.is_cloud:
+            if variables:
+                raise FigraniumError("Cloud does not support execution variable overrides; no execution was started.")
+            return self._request("POST", "/api/v1/executions", {"taskId": normalized_task_id})
         path = f"/api/tasks/{quote(normalized_task_id, safe='')}/api"
         return self._request("POST", path, {"variables": dict(variables)})
 
     def _request(
         self, method: str, path: str, payload: Mapping[str, Any] | None = None
-    ) -> dict[str, Any]:
+    ) -> Any:
         data = None if payload is None else json.dumps(payload).encode("utf-8")
         request = Request(
             f"{self.base_url}{path}",
@@ -130,7 +142,7 @@ class FigraniumClient:
             parsed = json.loads(body)
         except json.JSONDecodeError as error:
             raise FigraniumError("Figranium returned an invalid JSON response.") from error
-        if not isinstance(parsed, dict):
+        if not isinstance(parsed, (dict, list)):
             raise FigraniumError("Figranium returned an invalid JSON response.")
         return parsed
 

@@ -14,13 +14,13 @@ credentials_schema:
   - name: base_url
     type: text-input
     required: true
-    default: http://localhost:11345
+    default: https://cloud.figranium.dev
     label:
       en_US: Figranium base URL
     placeholder:
-      en_US: http://localhost:11345
+      en_US: https://cloud.figranium.dev
     help:
-      en_US: The reachable base URL of your self-hosted Figranium server.
+      en_US: Figranium Cloud URL or the reachable URL of your self-hosted server.
   - name: api_key
     type: secret-input
     required: true
